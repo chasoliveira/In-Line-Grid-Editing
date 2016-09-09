@@ -111,7 +111,7 @@
                 td.html(htmlValue);
             }
         }
-        var FieldElements = function (fields, row) {
+        var fieldElements = function (fields, row) {
             var fieldType = {
                 text: "text",
                 numeric: "numeric",
@@ -125,25 +125,25 @@
             var revert = new revertElement(row);
 
             var getItemnsWithParameters = function (field, callback) {
-                var paramns = [];
+                var parameter = [];
                 console.log(row);
-                field.paramns.loadBy.keys.forEach(function (current) {
+                field.parameter.loadBy.keys.forEach(function (current) {
                     var value = row.find("[name='" + current.from + "']option:selected");
                     console.log(value);
                     if (current.isInRow)
-                        paramns.push(current.key + "=" + row.find("[name='" + current.from + "']").val());
+                        parameter.push(current.key + "=" + row.find("[name='" + current.from + "']").val());
                     else
-                        paramns.push(current.key + "=" + row.closest("body").find("[name='" + current.from + "']").val());
+                        parameter.push(current.key + "=" + row.closest("body").find("[name='" + current.from + "']").val());
                 });
 
-                var uri = setUrl(field.paramns.uri, paramns.join("&"));
+                var uri = setUrl(field.parameter.uri, parameter.join("&"));
                 $.getJSON(uri, function (data) {
                     var result = fillDataFromResult(data, field);
                     callback(result);
                 });
             }
             var getItemnsWithOutParameters = function (field, callback) {
-                $.getJSON(field.paramns.uri, function (data) {
+                $.getJSON(field.parameter.uri, function (data) {
                     var result = fillDataFromResult(data, field);
                     callback(result);
                 });
@@ -151,12 +151,12 @@
             var fillDataFromResult = function (result, field) {
                 var dataReturn = [];
                 result.forEach(function (item) {
-                    dataReturn.push({ value: item[field.paramns.valueField], html: item[field.paramns.textField] });
+                    dataReturn.push({ value: item[field.parameter.valueField], html: item[field.parameter.textField] });
                 });
                 return dataReturn;
             }
             var getItemns = function (field, callback) {
-                if (field.paramns.loadBy != undefined)
+                if (field.parameter.loadBy != undefined)
                     getItemnsWithParameters(field, callback);
                 else
                     getItemnsWithOutParameters(field, callback);
@@ -180,11 +180,11 @@
             }
             this.setUpSelects = function () {
                 var selectFields = fields.filter(function (field) { return field.type === fieldType.select; });
-                var selectFieldsIndependents = selectFields.filter(function (field) { return field.paramns.loadBy === undefined; });
-                var selectFieldsDependents = selectFields.filter(function (field) { return typeof field.paramns.loadBy === "object"; });
+                var selectFieldsIndependents = selectFields.filter(function (field) { return field.parameter.loadBy === undefined; });
+                var selectFieldsDependents = selectFields.filter(function (field) { return typeof field.parameter.loadBy === "object"; });
                 selectFieldsIndependents.forEach(function (currentField) {
                     currentField.fieldsToLoad = selectFieldsDependents.filter(function (field) {
-                        return field.paramns.loadBy.keys.filter(function (item) {
+                        return field.parameter.loadBy.keys.filter(function (item) {
                             return item.from === currentField.name;
                         });
                     });
@@ -276,19 +276,19 @@
             this.addItemInGrid = function (event) {
                 var currentRow = $(this).closest("tr");
             };
-            this.EditItemInGrid = function (event) {
+            this.editItemInGrid = function (event) {
                 var currentRow = $(this).closest("tr");
                 showCancelApplyChangesButtons(currentRow);
                 var editFields = getFields();
-                var fieldElement = new FieldElements(editFields, currentRow);
+                var fieldElement = new fieldElements(editFields, currentRow);
                 fieldElement.setUpInputsOnRow(fieldElement.setUpSelects);
             };
             this.removeItemFromGrid = function (event) {
                 var currentRow = $(this).closest("tr");
                 var keysToDelete = getKeyAsUrlParameter(currentRow);
-                var url = setUrl(options.controller.uriDelete, keysToDelete);
+                var url = setUrl(options.controller.uriDelete.url, keysToDelete);
                 $.ajax({
-                    method: "POST",
+                    method: options.controller.uriDelete.verb,
                     url: url,
                     cache: false,
                     error: function (XMLHttpRequest, textStatus, errorThrown) {
@@ -305,7 +305,7 @@
             this.cancelEditOrAddInGrid = function (event) {
                 var currentRow = $(this).closest("tr");
                 var editFields = getFields();
-                var fieldElement = new FieldElements(editFields, currentRow);
+                var fieldElement = new fieldElements(editFields, currentRow);
                 fieldElement.setDownInputsOnRow(true);
                 showCancelApplyChangesButtons(currentRow);
             }
@@ -333,7 +333,13 @@
 
                     var divCustom = $("<div>", { "class": divClassButtonsCustom, });
                     buttons.custom.forEach(function (button) {
-                        divCustom.append($("<button>", { name: button.name, "class": button.class, type: "button" }).append($("<i>", { "class": button.icon })).append(button.text));
+                        var btn = $("<button>", { name: button.name, "class": button.class, type: "button" });
+                        var icon = $("<i>", { "class": button.icon });
+                        btn.append(icon);
+                        btn.append(button.text);
+                        divCustom.append(btn);
+                        if (!button.showcheck)
+                            btn.addClass("hide");
                     });
                     td.append(divCustom);
                 });
@@ -348,7 +354,7 @@
                             container.find("[name='" + cur.name + "']").on("click", config.cancelEditOrAddInGrid);
                             break;
                         case "edit":
-                            container.find("[name='" + cur.name + "']").on("click", config.EditItemInGrid);
+                            container.find("[name='" + cur.name + "']").on("click", config.editItemInGrid);
                             break;
                         case "delete":
                             container.find("[name='" + cur.name + "']").on("click", config.removeItemFromGrid);
