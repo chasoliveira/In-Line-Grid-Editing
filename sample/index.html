@@ -1,0 +1,65 @@
+<script>
+    $(document).ready(function () {
+        $("#tableToEdit").ilge({
+            controller: {
+                uriSave: {url: "/home/Add", verb: "post"},
+                uriUpdate: {url: "/home/Edit", verb: "post"},
+                uriDelete: {url: "/home/Delete", verb: "post"},
+                messageReturn: function (result) {
+                    alert(result.message);
+                }
+            },
+            fields: [
+                { column: 1, name: "Id", type: "numeric", edit: false, isKey: true },
+                { column: 2, name: "Name", type: "text", edit: true, "class": "span12" },
+                { column: 3, name: "Quantity", type: "numeric", edit: true },
+                { column: 4, name: "Price", type: "decimal", edit: true },
+                { column: 5, name: "Active", type: "bool", edit: true },
+                { column: 6, name: "ExpirationDate", type: "date", edit: true, actionFormatter: function (input) { console.log("Some format on field"); } },
+                {
+                    column: 7, name: "Categorie.Name", type: "select", edit: true, "class": "span12",
+                    parameter: { uri: "/home/LoadCategories", valueField: "Id", textField: "Name" }
+                },
+                {
+                    column: 8, name: "Model.Name", type: "select", edit: true, "class": "span12",
+                    parameter: { uri: "/home/LoadModels", valueField: "Id", textField: "Name" }
+                },
+                {
+                    column: 9, name: "Model.Lote.Name", type: "select", edit: true, "class": "span12",
+                    parameter: {
+                        uri: "/home/LoadLotes", valueField: "Id", textField: "Name",
+                        loadBy: {
+                            keys: [
+                                { key: "IdModel", from: "Model.Name", isInRow: true },
+                                { key: "IdCentro", from: "IdCentroTrabalho", isInRow: false },
+                            ]
+                        }
+                    }
+                },
+                {
+                    column: 10, type: "buttons",
+                    buttons: {
+                        custom: [
+                                { name: "myCustom", text:"My Awesome Button", type: "custom", "class": "btn btn-info", 
+                                 onClick: function (evt) { console.log("it was clicked"); },
+                                 showcheck : false 
+                                },
+                                 { name: "2myCustom", text:"My Second Awesome Button", type: "custom", "class": "btn btn-danger", 
+                                 onClick: function (evt) { console.log("second btn it was clicked"); },
+                                 showcheck : false 
+                                },
+                        ],
+                        editDelete: [
+                            { name: "edit", type: "edit", "class": "btn btn-warning", icon: "glyphicon glyphicon-edit" },
+                            { name: "delete", type: "remove", "class": "btn btn-danger", icon: "glyphicon glyphicon-trash" },
+                        ],
+                        cancelApply: [
+                            { name: "apply", type: "apply", "class": "btn btn-primary", icon: "glyphicon glyphicon-ok" },
+                            { name: "cancel", type: "cancel", "class": "btn btn-default", icon: "glyphicon glyphicon-ban-circle" },
+                        ],
+                    },
+                }
+            ]
+        });
+    });
+</script>
