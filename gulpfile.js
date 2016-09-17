@@ -21,4 +21,4 @@ gulp.task('copyToDemo', function () {
             min:'-min.js'
         }}))
     .pipe(gulp.dest('demo/InLineGridEditing/Scripts')) // Outputs the file in the destination folder
-})
+});

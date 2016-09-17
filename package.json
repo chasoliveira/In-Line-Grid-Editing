@@ -23,6 +23,7 @@
   },
   "homepage": "https://github.com/chasoliveira/In-Line-Grid-Editing#readme",
   "devDependencies": {
+    "dell": "^1.0.0",
     "gulp-concat": "^2.6.0",
     "gulp-minify": "0.0.14",
     "gulp-uglify": "^2.0.0",

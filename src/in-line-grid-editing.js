@@ -7,107 +7,119 @@
         options = options || {};
         container = $(container);
         var createElement = function (row) {
-            var makeChanged = function (field, currentValue) {
-                field.currentValue = currentValue;
-                field.isChanged = true;
+            function createHidden(td, name, value) {
+                td.append($("<input>", { type: "hidden", name: name + "-hidden", id: name + "-hidden", value: value }));
+            }
+            function actionFormatter(field, target) {
+                if (field.actionFormatter != undefined && typeof field.actionFormatter === "function")
+                    field.actionFormatter(target);
+            }
+            function getCurrentTd(field) {
+                return row.find("td:nth-child(" + field.column + ")");
+            }
+            function createInput(field) {
+                if (field.type === 'select')
+                    return $("<select>", { type: field.type, name: field.name, id: field.name, "class": field.class });
+                return $("<input>", { type: field.type, name: field.name, id: field.name, "class": field.class });
             }
             this.textField = function (field) {
-                var textInput = $("<input>", { type: "text", name: field.name, id: field.name, "class": field.class });
-                var td = row.find("td:nth-child(" + field.column + ")");
-                makeChanged(field, td.html());
-                textInput.val(field.currentValue);
-                if (field.actionFormatter != undefined && typeof field.actionFormatter === "function")
-                    field.actionFormatter(textInput);
+                var textInput = createInput(field);
+                var td = getCurrentTd(field);
+                var currentValue = td.html();
+                textInput.val(currentValue);
                 td.html(textInput);
+                actionFormatter(field, textInput);
+                createHidden(td, field.name, currentValue);
             }
             this.numericField = function (field) {
-                var numericInput = $("<input>", { type: "numeric", name: field.name, id: field.name, "class": field.class });
-                var td = row.find("td:nth-child(" + field.column + ")");
-                makeChanged(field, td.html());
-                numericInput.val(field.currentValue);
-                if (field.actionFormatter != undefined && typeof field.actionFormatter === "function")
-                    field.actionFormatter(textInput);
+                var numericInput = createInput(field);
+                var td = getCurrentTd(field);
+                var currentValue = td.html();
+                numericInput.val(currentValue);
+                actionFormatter(field, numericInput);
                 td.html(numericInput);
+                createHidden(td, field.name, currentValue);
             }
             this.decimalField = function (field) {
-                var textInput = $("<input>", { type: "numeric", name: field.name, id: field.name, "class": field.class });
-                var td = row.find("td:nth-child(" + field.column + ")");
-                makeChanged(field, td.html());
-                textInput.val(field.currentValue);
-                if (field.actionFormatter != undefined && typeof field.actionFormatter === "function")
-                    field.actionFormatter(textInput);
+                var textInput = createInput(field);
+                var td = getCurrentTd(field);
+                var currentValue = td.html();
+                textInput.val(currentValue);
+                actionFormatter(field, textInput);
                 td.html(textInput);
+                createHidden(td, field.name, currentValue);
             }
             this.boolField = function (field) {
-                var checkInput = $("<input>", { type: "checkbox", name: field.name, id: field.name, "class": field.class });
-                var td = row.find("td:nth-child(" + field.column + ")");
+                var checkInput = createInput(field);
+                var td = getCurrentTd(field)
                 var value = td.html().toLowerCase() === "true";
-                makeChanged(field, value);
-                checkInput.val(field.currentValue);
+                checkInput.val(value);
                 checkInput.attr("checked", value);
                 td.html(checkInput);
+                createHidden(td, field.name, value);
             }
             this.dateField = function (field) {
-                var dateInput = $("<input>", { type: "date", name: field.name, id: field.name, "class": field.class });
-                var td = row.find("td:nth-child(" + field.column + ")");
-                makeChanged(field, td.html());
-                dateInput.val(field.currentValue);
-                if (field.actionFormatter != undefined && typeof field.actionFormatter === "function")
-                    field.actionFormatter(dateInput);
+                var dateInput = createInput(field);
+                var td = getCurrentTd(field);
+                var currentValue = td.html();
+                dateInput.val(currentValue);
+                actionFormatter(field, dateInput);
                 td.html(dateInput);
+                createHidden(td, field.name, currentValue);
             }
             this.dateTimeField = function (field) {
-                var textInput = $("<input>", { type: "datetime", name: field.name, id: field.name, "class": field.class });
-                var td = row.find("td:nth-child(" + field.column + ")");
-                makeChanged(field, td.html());
-                textInput.val(field.currentValue);
-                if (field.actionFormatter != undefined && typeof field.actionFormatter === "function")
-                    field.actionFormatter(textInput);
+                var textInput = createInput(field);
+                var td = getCurrentTd(field);
+                var currentValue = td.html();
+                textInput.val(currentValue);
+                actionFormatter(field, textInput);
                 td.html(textInput);
+                createHidden(td, field.name, currentValue);
             }
 
             this.selectField = function (field) {
-                var selectInput = $("<select>", { type: "select", name: field.name, id: field.name, "class": field.class });
-                var td = row.find("td:nth-child(" + field.column + ")");
-                makeChanged(field, td.html());
+                var selectInput = createInput(field);
+                var td = getCurrentTd(field);
+                var currentValue = td.html();
                 td.html(selectInput);
+                createHidden(td, field.name, currentValue);
             }
 
         }
         var revertElement = function (row) {
             this.textField = function (field, toOldValue) {
                 var td = row.find("td:nth-child(" + field.column + ")");
-                var htmlValue = (toOldValue) ? field.currentValue : td.find("input[name=" + field.name + "]").val();
+                var htmlValue = (toOldValue) ? td.find("input[name='" + field.name + "-hidden']").val() : td.find("input[name=" + field.name + "]").val();
                 td.html(htmlValue);
             }
             this.numericField = function (field, toOldValue) {
                 var td = row.find("td:nth-child(" + field.column + ")");
-                var htmlValue = (toOldValue) ? field.currentValue : td.find("input[name=" + field.name + "]").val();
+                var htmlValue = (toOldValue) ? td.find("input[name='" + field.name + "-hidden']").val() : td.find("input[name=" + field.name + "]").val();
                 td.html(htmlValue);
             }
             this.decimalField = function (field, toOldValue) {
                 var td = row.find("td:nth-child(" + field.column + ")");
-                var htmlValue = (toOldValue) ? field.currentValue : td.find("input[name=" + field.name + "]").val();
+                var htmlValue = (toOldValue) ? td.find("input[name='" + field.name + "-hidden']").val() : td.find("input[name=" + field.name + "]").val();
                 td.html(htmlValue);
             }
             this.boolField = function (field, toOldValue) {
                 var td = row.find("td:nth-child(" + field.column + ")");
-                var htmlValue = (toOldValue) ? field.currentValue : td.find("input[name=" + field.name + "]").val();
+                var htmlValue = (toOldValue) ? td.find("input[name='" + field.name + "-hidden']").val() : td.find("input[name=" + field.name + "]").val();
                 td.html(htmlValue.toString());
             }
             this.dateField = function (field, toOldValue) {
                 var td = row.find("td:nth-child(" + field.column + ")");
-                var htmlValue = (toOldValue) ? field.currentValue : td.find("input[name=" + field.name + "]").val();
+                var htmlValue = (toOldValue) ? td.find("input[name='" + field.name + "-hidden']").val() : td.find("input[name=" + field.name + "]").val();
                 td.html(htmlValue);
             }
             this.dateTimeField = function (field, toOldValue) {
                 var td = row.find("td:nth-child(" + field.column + ")");
-                var htmlValue = (toOldValue) ? field.currentValue : td.find("input[name=" + field.name + "]").val();
+                var htmlValue = (toOldValue) ? td.find("input[name='" + field.name + "-hidden']").val() : td.find("input[name=" + field.name + "]").val();
                 td.html(htmlValue);
             }
             this.selectField = function (field, toOldValue) {
                 var td = row.find("td:nth-child(" + field.column + ")");
-                var htmlValue = (toOldValue) ? field.currentValue : td.find("select[name='" + field.name + "'] option:selected").html();
+                var htmlValue = (toOldValue) ? td.find("input[name='" + field.name + "-hidden']").val() : td.find("select[name='" + field.name + "'] option:selected").html();
                 td.html(htmlValue);
             }
         }
@@ -126,10 +138,8 @@
 
             var getItemnsWithParameters = function (field, callback) {
                 var parameter = [];
-                console.log(row);
                 field.parameter.loadBy.keys.forEach(function (current) {
                     var value = row.find("[name='" + current.from + "']option:selected");
-                    console.log(value);
                     if (current.isInRow)
                         parameter.push(current.key + "=" + row.find("[name='" + current.from + "']").val());
                     else
@@ -163,35 +173,40 @@
             }
             var count = 0;
             var setUpFillSelectFields = function (selectFields, callback) {
-                selectFields.forEach(function (currentField) {
+                var totalSelects = selectFields.length - 1;
+                var countFill = 0;
+                function fillSelect() {
+                    if (countFill > totalSelects) {
+                        if (typeof callback === 'function')
+                            callback();
+                        return;
+                    };
+                    var currentField = selectFields[countFill];
                     getItemns(currentField, function (items) {
+                        var td = row.find("td:nth-child(" + currentField.column + ")");
+                        var currentValue = td.find("input[name='" + currentField.name + "-hidden']").val();
+                        var currentSelect = row.find("select[name='" + currentField.name + "']");
+                        console.log(totalSelects + "currentField: " + currentField.name);
+                        console.log(totalSelects + "currentField: " + currentField.name + " items: " + items.length);
                         items.forEach(function (item) {
-                            var isSelected = item.html == currentField.currentValue;
-                            row.find("select[name='" + currentField.name + "']").append($("<option>", { value: item.value, html: item.html, selected: isSelected }));
+                            var isSelected = item.html == currentValue;
+                            currentSelect.append($("<option>", { value: item.value, html: item.html, selected: isSelected }));
                         });
-
+                        countFill++;
+                        fillSelect();
                     });
-                    count++;
-                    console.log("Executing " + count + " getItem: " + " Field: " + currentField.name);
-                });
-                console.log("execute callback futions");
-                if (typeof callback === "function")
-                    callback();
+                }
+                fillSelect();
             }
-            this.setUpSelects = function () {
+            var setUpSelectsDependents = function () {
+                var selectFields = fields.filter(function (field) { return field.type === fieldType.select; });
+                var selectFieldsDependents = selectFields.filter(function (field) { return typeof field.parameter.loadBy === "object"; });
+                setUpFillSelectFields(selectFieldsDependents);
+            }
+            var setUpSelects = function (callback) {
                 var selectFields = fields.filter(function (field) { return field.type === fieldType.select; });
                 var selectFieldsIndependents = selectFields.filter(function (field) { return field.parameter.loadBy === undefined; });
-                var selectFieldsDependents = selectFields.filter(function (field) { return typeof field.parameter.loadBy === "object"; });
-                selectFieldsIndependents.forEach(function (currentField) {
-                    currentField.fieldsToLoad = selectFieldsDependents.filter(function (field) {
-                        return field.parameter.loadBy.keys.filter(function (item) {
-                            return item.from === currentField.name;
-                        });
-                    });
-                });
-                setUpFillSelectFields(selectFieldsIndependents, function () {
-                    setUpFillSelectFields(selectFieldsDependents);
-                });
+                setUpFillSelectFields(selectFieldsIndependents, setUpSelectsDependents);
             }
 
             this.setUpInputsOnRow = function (callback) {
@@ -207,8 +222,7 @@
                         default: break;
                     }
                 });
-                if (typeof callback === "function")
-                    callback();
+                setUpSelects(setUpSelectsDependents);
             }
             this.setDownInputsOnRow = function (toOldValue) {
                 fields.forEach(function (currentField) {
@@ -281,7 +295,7 @@
                 showCancelApplyChangesButtons(currentRow);
                 var editFields = getFields();
                 var fieldElement = new fieldElements(editFields, currentRow);
-                fieldElement.setUpInputsOnRow(fieldElement.setUpSelects);
+                fieldElement.setUpInputsOnRow();
             };
             this.removeItemFromGrid = function (event) {
                 var currentRow = $(this).closest("tr");
@@ -345,23 +359,21 @@
                 });
             };
             var setUpEventButtons = function (buttons) {
-                buttons.forEach(function (cur) {
-                    switch (cur.type) {
-                        case "apply":
-                            container.find("[name='" + cur.name + "']").on("click", config.addItemInGrid);
-                            break;
-                        case "cancel":
-                            container.find("[name='" + cur.name + "']").on("click", config.cancelEditOrAddInGrid);
-                            break;
-                        case "edit":
-                            container.find("[name='" + cur.name + "']").on("click", config.editItemInGrid);
-                            break;
-                        case "delete":
-                            container.find("[name='" + cur.name + "']").on("click", config.removeItemFromGrid);
-                            break;
-                        case "custom":
-                            container.find("[name='" + cur.name + "']").on("click", cur.onClick);
-                            break;
+                var typeBtn = {
+                    apply: "apply",
+                    cancel: "cancel",
+                    edit: "edit",
+                    remove: "remove",
+                    custom: "custom",
+                }
+                buttons.forEach(function (currentBtn) {
+                    var actionButton = container.find("[name='" + currentBtn.name + "']");
+                    switch (currentBtn.type) {
+                        case typeBtn.apply: actionButton.on("click", config.addItemInGrid); break;
+                        case typeBtn.cancel: actionButton.on("click", config.cancelEditOrAddInGrid); break;
+                        case typeBtn.edit: actionButton.on("click", config.editItemInGrid); break;
+                        case typeBtn.remove: actionButton.on("click", config.removeItemFromGrid); break;
+                        case typeBtn.custom: actionButton.on("click", currentBtn.onClick); break;
                         default: break;
                     }
                 });
